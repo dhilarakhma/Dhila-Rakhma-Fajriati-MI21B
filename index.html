@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+        table,
+        tr,
+        th,
+        td {
+            border: 1px solid black;
+            padding: 5px;
+        }
+
+        table {
+            color: black;
+        }
+
+        thead {
+            color: black;
+        }
+
+        .box {
+            border: 1px solid black;
+            padding: 10px;
+            width: 120px;
+            height: 150px;
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+
+        }
+
+        .bgkecil {
+            width: 120px;
+            height: 190px;
+            background-color: grey;
+        }
+
+        .container {
+            display: flex;
+        }
+
+        .box {
+            margin: 3px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2><b>Baso Japri</b></h2>
+    <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit.</p>
+    <div>
+        <p> Nama Pemesan :
+            <input id="name" type="text" placeholder="Isi nama pemesan disini..." />
+        </p>
+    </div>
+
+    <div class="border">
+        <div class="box" id="pesan">
+            <div class="bgkecil"></div>
+            <h5 id="pesan"></h5>
+            <p id="pesan"></p>
+            <h5> Name </h5>
+            <p> Price </p>
+            <button id="button" onclick="saveData()">Pesan</button>
+        </div>
+    </div>
+
+    <h2><b>Daftar Pesanan</b></h2>
+    <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit.</p>
+    <table style="margin-top: 10px">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Nama</th>
+                <th>Pesanan</th>
+                <th>Jumlah</th>
+                <th>Harga</th>
+                <th>Total</th>
+                <th colspan="2">Action</th>
+            </tr>
+        </thead>
+        <tbody id="result"></tbody>
+    </table>
+
+    <script src="./axios.min.js"></script>
+    <script>
+        // CRUD SAVE DATA BARU (POST)
+        const saveData = async () => {
+            let nameForm = document.getElementById('name').value;
+            let orderForm = document.getElementById('order').value;
+            let countForm = document.getElementById('count').value;
+            let priceForm = document.getElementById('price').value;
+
+            await axios.post(`http://localhost:3000/order`, {
+                name: nameForm,
+                order: orderForm,
+                count: countForm,
+                price: priceForm,
+            })
+                .then((response) => {
+                    console.log(response);
+                })
+                .catch((response) => {
+                    console.log(response);
+                });
+        }
+
+        // CRUD DELETE
+        const deleteData = async (id) => {
+            let text = 'Yakin akan menghapus data?';
+            if (confirm(text) == true) {
+                await axios.delete(`http://localhost:3000/menu/${id}`)
+                    .then((response) => {
+                        console.log(response);
+                    })
+                    .catch((response) => {
+                        console.log(response);
+                    });
+            }
+        }
+
+        // GET DATA MENU
+        const getDataMenu = async () => {
+            await axios.get(`http://localhost:3000/menu`)
+                .then((response) => {
+                    let bucket = ``;
+                    let menu = response.data;
+
+                    if (menu.length > 0) {
+                        for (let i = 0; i < menu.length; i++) {
+                            bucket += `
+                <div class="bmenu">
+                <div class="box" id="pesan">
+                    <div class="bgkecil"></div>
+                    <h5 id="pesan"></h5>
+                    <p id="pesan"></p>
+                    <h5> ${menu[i].name} </h5>
+                    <p> ${menu[i].price} </p>
+                </div>
+                </div>
+                `;
+                        }
+                    } else {
+                        bucket += `
+              <tr>
+                <th colspan="7" style="text-align: center">Data pesanan belum ada</th>
+              </tr>
+            `
+                    }
+                    document.getElementById("result").innerHTML = bucket;
+                })
+                .catch((error) => {
+                    let bucket = `
+              <tr>
+                <th colspan="6" style="text-align: center">${error.message}</th>
+              </tr>
+            `;
+                    document.getElementById("result").innerHTML = bucket;
+                });
+        };
+        getDataMenu();
+
+        // GET DATA ORDER
+        const getDataOrder= async () => {
+            await axios.get(`http://localhost:3000/order`)
+                .then((response) => {
+                    let bucket = ``;
+                    let total = 0;
+                    let order = response.data;
+
+                    if (order.length > 0) {
+                        for (let i = 0; i < order.length; i++) {
+                            bucket += `
+                <tr>
+                  <td style="text-align: center">${i + 1}</td>
+                  <td>${order[i].name}</td>
+                  <td>${order[i].order}</td>
+                  <td>${order[i].count}</td>
+                  <td>${order[i].price}</td>
+                  <td>
+                    <button onclick="deleteData(${order[i].id})">Batal</button>
+                  </td>
+                </tr>
+                `;
+                        }
+                    } else {
+                        bucket += `
+              <tr>
+                <th colspan="7" style="text-align: center">Data pesanan belum ada</th>
+              </tr>
+            `
+                    }
+                    document.getElementById("result").innerHTML = bucket;
+                })
+                .catch((error) => {
+                    let bucket = `
+              <tr>
+                <th colspan="7" style="text-align: center">${error.message}</th>
+              </tr>
+            `;
+                    document.getElementById("result").innerHTML = bucket;
+                });
+        };
+        getDataOrder();
+    </script>
+</body>
+
+</html>
